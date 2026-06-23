@@ -1,0 +1,740 @@
+<style>
+/* ── Reset partiel ── */
+.tt * { box-sizing: border-box; }
+.tt, .tt * { margin: 0; padding: 0; }
+
+/* ── Variables ── */
+.tt {
+  --red: #C0392B;
+  --red-dark: #922b21;
+  --dark: #0d0d0d;
+  --dark2: #141414;
+  --dark3: #1c1c1c;
+  --border: rgba(255,255,255,0.08);
+  --muted: rgba(255,255,255,0.45);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--dark);
+  color: #ffffff;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── NAV ── */
+.tt-nav {
+  padding: 0 48px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(13,13,13,0.95);
+  border-bottom: 1px solid var(--border);
+}
+.tt-brand { font-size: 20px; font-weight: 900; letter-spacing: 0.06em; color: #fff; }
+.tt-brand-red { color: var(--red); }
+.tt-nav-links { display: flex; align-items: center; gap: 32px; }
+.tt-nav-link { font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; }
+.tt-nav-cta {
+  background: var(--red);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 9px 22px;
+  border-radius: 8px;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+
+/* ── HERO ── */
+.tt-hero-wrap {
+  background: var(--dark);
+  border-bottom: 1px solid var(--border);
+}
+.tt-hero {
+  padding: 100px 48px 80px;
+  display: flex;
+  align-items: center;
+  gap: 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.tt-hero-left { flex: 1; min-width: 0; }
+
+.tt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(192,57,43,0.12);
+  border: 1px solid rgba(192,57,43,0.3);
+  color: #e8503f;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 14px 6px 10px;
+  border-radius: 100px;
+  margin-bottom: 32px;
+}
+.tt-badge-dot {
+  width: 6px; height: 6px;
+  background: var(--red);
+  border-radius: 50%;
+  animation: tt-pulse 2s infinite;
+}
+@keyframes tt-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.tt-h1 {
+  font-size: clamp(40px, 5vw, 68px);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: #fff;
+  margin-bottom: 24px;
+}
+.tt-h1-accent { color: var(--red); }
+.tt-h1-outline {
+  -webkit-text-stroke: 1.5px rgba(255,255,255,0.3);
+  color: transparent;
+}
+
+.tt-lead {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--muted);
+  max-width: 460px;
+  margin-bottom: 44px;
+}
+
+.tt-hero-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.tt-btn-primary {
+  background: var(--red);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: 10px;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+.tt-btn-ghost {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.tt-stats-row {
+  display: flex;
+  gap: 32px;
+  margin-top: 52px;
+  padding-top: 36px;
+  border-top: 1px solid var(--border);
+}
+.tt-stat-n {
+  font-size: 28px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.02em;
+  display: block;
+}
+.tt-stat-n-red { color: var(--red); }
+.tt-stat-l { font-size: 12px; color: var(--muted); display: block; margin-top: 2px; }
+
+/* ── WIDGET FORMULAIRE ── */
+.tt-hero-right { width: 380px; flex-shrink: 0; }
+
+.tt-widget {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.tt-widget-header {
+  background: var(--dark3);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tt-dots { display: flex; gap: 6px; }
+.tt-dot { width: 10px; height: 10px; border-radius: 50%; }
+.tt-dot-r { background: #ff5f57; }
+.tt-dot-y { background: #ffbd2e; }
+.tt-dot-g { background: #28ca41; }
+.tt-url {
+  flex: 1;
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+.tt-widget-body { padding: 28px 24px 20px; }
+.tt-widget-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 10px;
+}
+.tt-widget-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.tt-widget-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+/* ↓↓↓ ZONE FORMULAIRE NATIF SYSTEME.IO ↓↓↓
+   Insérer le bloc formulaire natif directement
+   après ce bloc HTML dans l'éditeur Systeme.io.
+   Les styles ci-dessous habillent ce formulaire. */
+.tt-form-note {
+  font-size: 10px;
+  color: rgba(255,255,255,0.25);
+  text-align: center;
+  margin-top: 12px;
+  padding: 0 24px 20px;
+}
+
+.tt-notif {
+  background: var(--dark3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  animation: tt-fadeup 0.5s ease forwards;
+}
+@keyframes tt-fadeup {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tt-notif-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.tt-notif-text { font-size: 12px; color: rgba(255,255,255,0.7); }
+.tt-notif-text strong { color: #fff; }
+.tt-notif-time { font-size: 11px; color: var(--muted); margin-left: auto; flex-shrink: 0; }
+
+/* ── SEGMENTS ── */
+.tt-segments {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 48px;
+  background: var(--dark2);
+}
+.tt-segments-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.tt-seg-for {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 6px;
+}
+.tt-seg-pill {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.65);
+  padding: 5px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+}
+
+/* ── SECTION GÉNÉRIQUE ── */
+.tt-section {
+  padding: 88px 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.tt-divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+.tt-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tt-eyebrow-line {
+  display: block;
+  width: 24px; height: 1.5px;
+  background: var(--red);
+  flex-shrink: 0;
+}
+.tt-h2 {
+  font-size: clamp(28px, 3.5vw, 46px);
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  color: #fff;
+  margin-bottom: 52px;
+  max-width: 560px;
+}
+
+/* ── PAIN GRID ── */
+.tt-pain-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.tt-pain-card { background: var(--dark2); padding: 36px 28px; }
+.tt-pain-num {
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--red);
+  letter-spacing: -0.04em;
+  display: block;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+.tt-pain-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.tt-pain-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── AVANT / APRÈS ── */
+.tt-compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.tt-compare-card {
+  border-radius: 16px;
+  padding: 36px 32px;
+  border: 1px solid var(--border);
+}
+.tt-compare-before { background: var(--dark2); }
+.tt-compare-after {
+  background: rgba(192,57,43,0.07);
+  border-color: rgba(192,57,43,0.25);
+}
+.tt-compare-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 100px;
+}
+.tt-label-before { background: rgba(255,255,255,0.05); color: var(--muted); }
+.tt-label-after { background: rgba(192,57,43,0.15); color: var(--red); }
+.tt-compare-title { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 20px; letter-spacing: -0.01em; }
+.tt-compare-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.tt-compare-before .tt-compare-item { color: var(--muted); }
+.tt-compare-after .tt-compare-item { color: rgba(255,255,255,0.8); }
+.tt-icon {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.tt-icon-bad { background: rgba(220,38,38,0.12); color: #ef4444; }
+.tt-icon-good { background: rgba(34,197,94,0.12); color: #22c55e; }
+
+/* ── STEPS ── */
+.tt-steps {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.tt-step {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 32px 36px;
+  border-bottom: 1px solid var(--border);
+  background: var(--dark2);
+}
+.tt-step-last { border-bottom: none; }
+.tt-step-num { font-size: 13px; font-weight: 800; color: var(--red); min-width: 24px; }
+.tt-step-content { flex: 1; }
+.tt-step-title { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 5px; }
+.tt-step-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.tt-step-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  background: rgba(192,57,43,0.12);
+  border: 1px solid rgba(192,57,43,0.2);
+  color: var(--red);
+  border-radius: 100px;
+  flex-shrink: 0;
+}
+
+/* ── GAINS ── */
+.tt-gains-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.tt-gain-card {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px 24px;
+}
+.tt-gain-val {
+  font-size: 38px;
+  font-weight: 900;
+  color: var(--red);
+  letter-spacing: -0.03em;
+  display: block;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+.tt-gain-label { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.tt-gain-detail { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+/* ── RÉASSURANCE ── */
+.tt-reas {
+  background: var(--dark2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 48px;
+}
+.tt-reas-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.tt-rea-item { padding: 0 48px; border-right: 1px solid var(--border); }
+.tt-rea-first { padding-left: 0; }
+.tt-rea-last { border-right: none; padding-right: 0; }
+.tt-rea-num { font-size: 36px; font-weight: 900; color: var(--red); display: block; margin-bottom: 6px; }
+.tt-rea-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.tt-rea-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+/* ── CTA FINAL ── */
+.tt-cta { padding: 96px 48px; text-align: center; }
+.tt-cta-inner { max-width: 640px; margin: 0 auto; }
+.tt-cta-h2 {
+  font-size: clamp(30px, 4vw, 50px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.06;
+  margin-bottom: 20px;
+}
+.tt-cta-sub { font-size: 17px; color: var(--muted); margin-bottom: 36px; line-height: 1.6; }
+
+/* ── FOOTER ── */
+.tt-footer {
+  padding: 28px 48px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tt-footer-brand { font-size: 16px; font-weight: 900; letter-spacing: 0.05em; }
+.tt-footer-text { font-size: 12px; color: var(--muted); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 960px) {
+  .tt-nav { padding: 0 24px; }
+  .tt-nav-links { display: none; }
+  .tt-hero { flex-direction: column; padding: 80px 24px 60px; gap: 40px; }
+  .tt-hero-right { width: 100%; }
+  .tt-segments { padding: 16px 24px; }
+  .tt-section { padding: 64px 24px; }
+  .tt-pain-grid { grid-template-columns: repeat(2, 1fr); }
+  .tt-gains-grid { grid-template-columns: repeat(2, 1fr); }
+  .tt-compare-grid { grid-template-columns: 1fr; }
+  .tt-reas { padding: 40px 24px; }
+  .tt-reas-inner { grid-template-columns: 1fr; gap: 24px; }
+  .tt-rea-item { padding: 0; border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
+  .tt-rea-last { border-bottom: none; padding-bottom: 0; }
+  .tt-cta { padding: 64px 24px; }
+  .tt-footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
+  .tt-step { gap: 16px; padding: 24px 20px; }
+}
+</style>
+
+<div class="tt">
+
+<!-- NAV -->
+<nav class="tt-nav">
+  <div class="tt-brand"><span class="tt-brand-red">TOW</span>TRUCK</div>
+  <div class="tt-nav-links">
+    <a href="#tt-probleme" class="tt-nav-link">Le problème</a>
+    <a href="#tt-comment" class="tt-nav-link">Comment ça marche</a>
+    <a href="#tt-form" class="tt-nav-link">Contact</a>
+  </div>
+  <a href="#tt-form" class="tt-nav-cta">Être rappelé →</a>
+</nav>
+
+<!-- HERO -->
+<div class="tt-hero-wrap">
+  <div class="tt-hero">
+    <div class="tt-hero-left">
+      <div class="tt-badge">
+        <span class="tt-badge-dot"></span>
+        Offre professionnelle — Île-de-France
+      </div>
+      <h1 class="tt-h1">
+        Votre flotte<br>
+        ne s'arrête <span class="tt-h1-outline">jamais.</span><br>
+        <span class="tt-h1-accent">Même en panne.</span>
+      </h1>
+      <p class="tt-lead">TowTruck connecte vos conducteurs à des dépanneurs vérifiés en IDF, disponibles 24h/24. Prix affiché avant intervention, suivi en temps réel, facturation centralisée.</p>
+      <div class="tt-hero-actions">
+        <a href="#tt-form" class="tt-btn-primary">Demander une présentation →</a>
+        <a href="#tt-comment" class="tt-btn-ghost">Voir comment ça marche ↓</a>
+      </div>
+      <div class="tt-stats-row">
+        <div>
+          <span class="tt-stat-n"><span class="tt-stat-n-red">177</span></span>
+          <span class="tt-stat-l">Dépanneurs actifs IDF</span>
+        </div>
+        <div>
+          <span class="tt-stat-n"><span class="tt-stat-n-red">24h</span>/24</span>
+          <span class="tt-stat-l">Disponibilité garantie</span>
+        </div>
+        <div>
+          <span class="tt-stat-n"><span class="tt-stat-n-red">0€</span></span>
+          <span class="tt-stat-l">Avance de trésorerie</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tt-hero-right" id="tt-form">
+      <div class="tt-widget">
+        <div class="tt-widget-header">
+          <div class="tt-dots">
+            <div class="tt-dot tt-dot-r"></div>
+            <div class="tt-dot tt-dot-y"></div>
+            <div class="tt-dot tt-dot-g"></div>
+          </div>
+          <div class="tt-url">app.towtruck.fr — Espace pro</div>
+        </div>
+        <div class="tt-widget-body">
+          <div class="tt-widget-eyebrow">Offre pro</div>
+          <div class="tt-widget-title">Être rappelé par notre équipe</div>
+          <div class="tt-widget-sub">Laissez vos coordonnées — nous vous contactons sous 24h pour vous présenter l'offre flotte.</div>
+        </div>
+        <!-- ↓↓↓ INSÉRER ICI LE BLOC FORMULAIRE NATIF SYSTEME.IO ↓↓↓
+             Champs : Nom & prénom / Société / Téléphone
+             Bouton : "Demander à être rappelé"
+             ↑↑↑ FIN ZONE FORMULAIRE ↑↑↑ -->
+        <div class="tt-form-note">Sans engagement · Rappel sous 24h ouvrées</div>
+      </div>
+      <div class="tt-notif">
+        <div class="tt-notif-dot" style="background:#22c55e;"></div>
+        <div class="tt-notif-text"><strong>Nouveau contact</strong> — Société ABC Transport</div>
+        <div class="tt-notif-time">il y a 1 min</div>
+      </div>
+      <div class="tt-notif" style="animation-delay:0.3s;">
+        <div class="tt-notif-dot" style="background:#3b82f6;"></div>
+        <div class="tt-notif-text"><strong>RDV confirmé</strong> — VTC Paris Prestige · 14h30</div>
+        <div class="tt-notif-time">il y a 3 min</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SEGMENTS -->
+<div class="tt-segments">
+  <div class="tt-segments-inner">
+    <span class="tt-seg-for">Pour</span>
+    <span class="tt-seg-pill">VTC &amp; Taxis</span>
+    <span class="tt-seg-pill">Ambulances</span>
+    <span class="tt-seg-pill">Livraison dernier kilomètre</span>
+    <span class="tt-seg-pill">Auto-écoles</span>
+    <span class="tt-seg-pill">Loueurs</span>
+    <span class="tt-seg-pill">Garages</span>
+  </div>
+</div>
+
+<!-- PROBLÈME -->
+<hr class="tt-divider">
+<div class="tt-section" id="tt-probleme">
+  <div class="tt-eyebrow"><span class="tt-eyebrow-line"></span>Le coût réel d'une panne</div>
+  <h2 class="tt-h2">Un véhicule immobilisé, c'est une perte immédiate</h2>
+  <div class="tt-pain-grid">
+    <div class="tt-pain-card">
+      <span class="tt-pain-num">300€</span>
+      <div class="tt-pain-title">Perdus par heure</div>
+      <div class="tt-pain-desc">Un VTC ou taxi en panne perd en moyenne 300 € de chiffre d'affaires par heure d'immobilisation.</div>
+    </div>
+    <div class="tt-pain-card">
+      <span class="tt-pain-num">45 min</span>
+      <div class="tt-pain-title">D'attente moyenne</div>
+      <div class="tt-pain-desc">Avec l'assistance traditionnelle. Délai inconnu, conducteur bloqué, client perdu.</div>
+    </div>
+    <div class="tt-pain-card">
+      <span class="tt-pain-num">0</span>
+      <div class="tt-pain-title">Visibilité sur les prix</div>
+      <div class="tt-pain-desc">La facture tombe après l'intervention. Impossible d'anticiper ou de valider les coûts de parc.</div>
+    </div>
+    <div class="tt-pain-card">
+      <span class="tt-pain-num">∅</span>
+      <div class="tt-pain-title">Suivi centralisé</div>
+      <div class="tt-pain-desc">Aucune trace des interventions. La gestion de parc se fait encore à la main.</div>
+    </div>
+  </div>
+</div>
+
+<!-- AVANT / APRÈS -->
+<hr class="tt-divider">
+<div class="tt-section">
+  <div class="tt-eyebrow"><span class="tt-eyebrow-line"></span>Pourquoi TowTruck</div>
+  <h2 class="tt-h2">L'ancienne méthode vs TowTruck</h2>
+  <div class="tt-compare-grid">
+    <div class="tt-compare-card tt-compare-before">
+      <span class="tt-compare-label tt-label-before">✕ &nbsp;Sans TowTruck</span>
+      <div class="tt-compare-title">L'assistance classique</div>
+      <div class="tt-compare-item"><div class="tt-icon tt-icon-bad">✕</div><span>Délai d'attente inconnu, conducteur bloqué sans info</span></div>
+      <div class="tt-compare-item"><div class="tt-icon tt-icon-bad">✕</div><span>Prix communiqué après intervention, pas avant</span></div>
+      <div class="tt-compare-item"><div class="tt-icon tt-icon-bad">✕</div><span>Aucun suivi GPS, aucune visibilité en temps réel</span></div>
+      <div class="tt-compare-item"><div class="tt-icon tt-icon-bad">✕</div><span>Facturation manuelle, aucun rapport d'intervention</span></div>
+      <div class="tt-compare-item"><div class="tt-icon tt-icon-bad">✕</div><span>Gestion de parc éclatée entre plusieurs interlocuteurs</span></div>
+    </div>
+    <div class="tt-compare-card tt-compare-after">
+      <span class="tt-compare-label tt-label-after">✓ &nbsp;Avec TowTruck</span>
+      <div class="tt-compare-title">La méthode TowTruck</div>
+      <div class="tt-compare-item"><div class="tt-icon tt-icon-good">✓</div><span>Dépanneur dispatché en quelques secondes, heure d'arrivée estimée en temps réel</span></div>
+      <div class="tt-compare-item"><div class="tt-icon tt-icon-good">✓</div><span>Prix affiché et validé avant toute intervention</span></div>
+      <div class="tt-compare-item"><div class="tt-icon tt-icon-good">✓</div><span>Localisation du dépanneur en direct depuis l'application conducteur</span></div>
+      <div class="tt-compare-item"><div class="tt-icon tt-icon-good">✓</div><span>Rapport automatique + paiement Stripe centralisé</span></div>
+      <div class="tt-compare-item"><div class="tt-icon tt-icon-good">✓</div><span>Un compte pro, une facturation mensuelle pour toute la flotte</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- COMMENT ÇA MARCHE -->
+<hr class="tt-divider">
+<div class="tt-section" id="tt-comment">
+  <div class="tt-eyebrow"><span class="tt-eyebrow-line"></span>Comment ça marche</div>
+  <h2 class="tt-h2">De la panne à la reprise en 3 étapes</h2>
+  <div class="tt-steps">
+    <div class="tt-step">
+      <div class="tt-step-num">1</div>
+      <div class="tt-step-content">
+        <div class="tt-step-title">Signalement instantané</div>
+        <div class="tt-step-desc">Le conducteur ouvre l'app, sélectionne le type de panne. Le tarif s'affiche immédiatement — avant toute validation. Zéro surprise.</div>
+      </div>
+      <div class="tt-step-tag">En quelques secondes</div>
+    </div>
+    <div class="tt-step">
+      <div class="tt-step-num">2</div>
+      <div class="tt-step-content">
+        <div class="tt-step-title">Dépanneur dispatché automatiquement</div>
+        <div class="tt-step-desc">Un dépanneur vérifié en IDF accepte la mission. Le conducteur suit son arrivée en temps réel sur la carte.</div>
+      </div>
+      <div class="tt-step-tag">Localisation en direct</div>
+    </div>
+    <div class="tt-step tt-step-last">
+      <div class="tt-step-num">3</div>
+      <div class="tt-step-content">
+        <div class="tt-step-title">Paiement &amp; rapport automatique</div>
+        <div class="tt-step-desc">Règlement sécurisé via Stripe. Rapport d'intervention généré automatiquement pour votre comptabilité et votre suivi de parc.</div>
+      </div>
+      <div class="tt-step-tag">Facturation centralisée</div>
+    </div>
+  </div>
+  <a href="#tt-form" class="tt-btn-primary">Être rappelé →</a>
+</div>
+
+<!-- CE QUE VOUS GAGNEZ -->
+<hr class="tt-divider">
+<div class="tt-section">
+  <div class="tt-eyebrow"><span class="tt-eyebrow-line"></span>Ce que vous gagnez</div>
+  <h2 class="tt-h2">Un service pro pensé pour votre flotte</h2>
+  <div class="tt-gains-grid">
+    <div class="tt-gain-card">
+      <span class="tt-gain-val">−70%</span>
+      <div class="tt-gain-label">Temps d'attente</div>
+      <div class="tt-gain-detail">Dépanneurs positionnés en IDF, disponibles immédiatement, 24h/24.</div>
+    </div>
+    <div class="tt-gain-card">
+      <span class="tt-gain-val">100%</span>
+      <div class="tt-gain-label">Prix connu avant</div>
+      <div class="tt-gain-detail">Tarif affiché et validé avant toute intervention. Aucune surprise sur facture.</div>
+    </div>
+    <div class="tt-gain-card">
+      <span class="tt-gain-val">1</span>
+      <div class="tt-gain-label">Interlocuteur unique</div>
+      <div class="tt-gain-detail">Compte pro unique, facturation mensuelle centralisée pour toute la flotte.</div>
+    </div>
+    <div class="tt-gain-card">
+      <span class="tt-gain-val">24/7</span>
+      <div class="tt-gain-label">Disponibilité totale</div>
+      <div class="tt-gain-detail">Nuits, week-ends, jours fériés — la couverture ne s'arrête jamais.</div>
+    </div>
+  </div>
+  <a href="#tt-form" class="tt-btn-primary">Être rappelé →</a>
+</div>
+
+<!-- RÉASSURANCE -->
+<div class="tt-reas">
+  <div class="tt-reas-inner">
+    <div class="tt-rea-item tt-rea-first">
+      <span class="tt-rea-num">177</span>
+      <div class="tt-rea-title">Dépanneurs actifs</div>
+      <div class="tt-rea-desc">Tous vérifiés, couvrant l'ensemble de l'Île-de-France dès le lancement</div>
+    </div>
+    <div class="tt-rea-item">
+      <span class="tt-rea-num">Stripe</span>
+      <div class="tt-rea-title">Paiement sécurisé</div>
+      <div class="tt-rea-desc">Traçable, sans avance de trésorerie, rapport automatique après chaque intervention</div>
+    </div>
+    <div class="tt-rea-item tt-rea-last">
+      <span class="tt-rea-num">IDF</span>
+      <div class="tt-rea-title">Zone couverte</div>
+      <div class="tt-rea-desc">Couverture complète Île-de-France, 24h/24, 7j/7, autoroutes incluses</div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA FINAL -->
+<div class="tt-cta">
+  <div class="tt-cta-inner">
+    <h2 class="tt-cta-h2">Votre flotte mérite mieux qu'une assistance archaïque.</h2>
+    <p class="tt-cta-sub">Laissez vos coordonnées — on vous rappelle sous 24h pour vous présenter l'offre pro TowTruck.</p>
+    <a href="#tt-form" class="tt-btn-primary">Être rappelé par notre équipe →</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="tt-footer">
+  <div class="tt-footer-brand"><span class="tt-brand-red">TOW</span>TRUCK</div>
+  <div class="tt-footer-text">Île-de-France · contact@towtruck.fr</div>
+</div>
+
+</div>

@@ -145,6 +145,7 @@ body {
   color: var(--muted);
   max-width: 460px;
   margin-bottom: 44px;
+  text-align: left;
 }
 
 .hero-actions {
@@ -240,7 +241,7 @@ body {
   text-align: center;
 }
 
-.widget-body { padding: 28px 24px; }
+.widget-body { padding: 28px 24px; text-align: center; }
 .widget-label {
   font-size: 10px;
   font-weight: 700;
@@ -392,6 +393,10 @@ body {
   color: #fff;
   margin-bottom: 56px;
   max-width: 560px;
+}
+#probleme .section-h2,
+#gains .section-h2 {
+  max-width: 100%;
 }
 
 /* ─── PAIN ─── */
@@ -655,13 +660,15 @@ body {
   font-weight: 900;
   letter-spacing: -0.03em;
   line-height: 1.06;
-  margin-bottom: 20px;
+  max-width: 600px;
+  margin: 0 auto 20px;
 }
 .cta-sub {
   font-size: 17px;
   color: var(--muted);
-  margin-bottom: 40px;
   line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto 40px;
 }
 .cta-actions {
   display: flex;
@@ -700,6 +707,28 @@ body {
   .cta-section { padding: 64px 24px; }
   .footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
   .step { gap: 16px; padding: 24px 20px; }
+}
+
+@media (max-width: 768px) {
+  .hero { flex-direction: column; padding: 80px 20px 40px; gap: 32px; }
+  .hero-right { width: 100%; }
+  .hero-h1 { font-size: 36px; }
+  .hero-lead { text-align: center; margin: 0 auto 32px; }
+  .hero-actions { justify-content: center; }
+  .hero-stats-row { justify-content: center; gap: 20px; }
+  .pain-grid { grid-template-columns: repeat(2, 1fr); }
+  .gains-grid { grid-template-columns: repeat(2, 1fr); }
+  .compare-grid { grid-template-columns: 1fr; }
+  .reas-inner { grid-template-columns: 1fr; gap: 24px; }
+  .rea-item { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
+  .rea-item:last-child { border-bottom: none; }
+  .step { flex-direction: column; gap: 12px; padding: 20px; }
+  .step-tag { align-self: flex-start; }
+  .section { padding: 60px 20px; }
+  .nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .cta-section { padding: 60px 20px; }
+  .footer { flex-direction: column; gap: 8px; text-align: center; padding: 20px; }
 }
 </style>
 </head>
@@ -920,7 +949,7 @@ body {
 
 <!-- CE QUE VOUS GAGNEZ -->
 <hr class="section-divider">
-<div class="section">
+<div class="section" id="gains">
   <div class="eyebrow">Ce que vous gagnez</div>
   <h2 class="section-h2">Un service pro pensé pour votre flotte</h2>
   <div class="gains-grid">

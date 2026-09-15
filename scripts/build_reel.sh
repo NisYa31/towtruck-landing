@@ -85,6 +85,7 @@ OUT_PATH="$SRC_DIR/$OUT_NAME"
 # absente ou ambiguë est une erreur : mieux vaut s'arrêter que monter le
 # mauvais plan.
 declare -a FILES=() DURS=()
+declare -a MISSING=() AMBIGUOUS=()
 TOTAL=0
 
 echo
@@ -94,14 +95,18 @@ for entry in "${CLIPS[@]}"; do
 
   # shellcheck disable=SC2231  # glob volontairement non quoté pour l'expansion
   matches=( $SRC_DIR/$(printf "$FILE_GLOB" "$stamp") )
+
   if [[ ${#matches[@]} -eq 0 || ! -e "${matches[0]}" ]]; then
-    echo "ERREUR : aucun fichier pour l'horodatage $stamp dans $SRC_DIR" >&2
-    exit 1
+    # Fichier absent : on note et on continue, pour dresser le bilan complet
+    # au lieu de s'arrêter au premier problème.
+    MISSING+=( "$stamp ($label)" )
+    printf '  %-8s %ss  %-20s %s\n' "$stamp" "$dur" "$label" "ABSENT"
+    continue
   fi
   if [[ ${#matches[@]} -gt 1 ]]; then
-    echo "ERREUR : horodatage $stamp ambigu, ${#matches[@]} fichiers correspondent :" >&2
-    printf '  %s\n' "${matches[@]}" >&2
-    exit 1
+    AMBIGUOUS+=( "$stamp -> ${#matches[@]} fichiers" )
+    printf '  %-8s %ss  %-20s %s\n' "$stamp" "$dur" "$label" "AMBIGU (${#matches[@]} fichiers)"
+    continue
   fi
 
   FILES+=( "${matches[0]}" )
@@ -109,6 +114,37 @@ for entry in "${CLIPS[@]}"; do
   TOTAL=$(( TOTAL + dur ))
   printf '  %-8s %ss  %-20s %s\n' "$stamp" "$dur" "$label" "$(basename "${matches[0]}")"
 done
+
+# Bilan : on refuse d'encoder un montage incomplet, qui donnerait une vidéo
+# silencieusement plus courte et avec des plans manquants.
+if [[ ${#MISSING[@]} -gt 0 || ${#AMBIGUOUS[@]} -gt 0 ]]; then
+  echo >&2
+  echo "ERREUR : montage incomplet, aucun encodage lancé." >&2
+  [[ ${#MISSING[@]} -gt 0 ]] && {
+    echo "  ${#MISSING[@]} clip(s) introuvable(s) :" >&2
+    printf '    %s\n' "${MISSING[@]}" >&2
+  }
+  [[ ${#AMBIGUOUS[@]} -gt 0 ]] && {
+    echo "  ${#AMBIGUOUS[@]} horodatage(s) ambigu(s) :" >&2
+    printf '    %s\n' "${AMBIGUOUS[@]}" >&2
+  }
+  # Aide au diagnostic : ce que contient réellement le dossier.
+  echo >&2
+  echo "  Fichiers .mp4 présents dans $SRC_DIR :" >&2
+  found=0
+  for f in "$SRC_DIR"/*.mp4; do
+    [[ -e "$f" ]] || continue
+    base=$(basename "$f")
+    [[ "$base" == "$OUT_NAME" ]] && continue
+    printf '    %s\n' "$base" >&2
+    found=1
+  done
+  [[ $found -eq 0 ]] && echo "    (aucun)" >&2
+  echo >&2
+  echo "  Corrigez les noms de fichiers, ou ajustez la liste CLIPS / FILE_GLOB." >&2
+  exit 1
+fi
+
 echo "Durée attendue : ${TOTAL}s"
 
 # ──────────────────── CONSTRUCTION DE LA COMMANDE ────────────────────

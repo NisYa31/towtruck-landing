@@ -45,6 +45,8 @@ CLIPS=(
 # Format de sortie.
 WIDTH=1076
 HEIGHT=1928
+# Mettre FPS à la cadence native des sources évite la duplication d'images
+# (une source en 24 fps rendue en 30 fps duplique une image sur quatre).
 FPS=30
 
 # Fondu de sortie, en secondes, appliqué à la fin du montage global.
@@ -142,7 +144,7 @@ ffmpeg -hide_banner -y \
     -filter_complex "$graph" \
     -map "[vout]" "${audio_args[@]}" \
     -c:v libx264 -preset "$PRESET" -crf "$CRF" \
-    -profile:v high -level 4.1 -pix_fmt yuv420p \
+    -profile:v high -pix_fmt yuv420p \
     -r "$FPS" -g $((FPS * 2)) -keyint_min "$FPS" -sc_threshold 0 \
     -movflags +faststart \
     "$OUTPUT"

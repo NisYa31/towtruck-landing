@@ -12,6 +12,10 @@
 #
 set -euo pipefail
 
+# Force le point comme séparateur décimal. Sous une locale française,
+# awk formaterait "19,500" au lieu de "19.500", que ffmpeg rejette.
+export LC_ALL=C
+
 # ══════════════════════════════════════════════════════════════════════
 #  CONFIGURATION — tout ce qui se modifie au quotidien est ici
 # ══════════════════════════════════════════════════════════════════════

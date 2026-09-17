@@ -135,11 +135,21 @@ MUSIC="${MUSIC:-}"
 
 # Seconde du morceau à laquelle commencer. Sert à attraper le bon passage :
 # un refrain ou une montée tombent rarement à 0:00. Voir ./find_drop.sh
-MUSIC_START=0
+MUSIC_START="${MUSIC_START:-0}"
 
 # Fondu d'entrée de la musique, en secondes. Le fondu de sortie est calé
 # automatiquement sur FADE_OUT, pour que son et image s'éteignent ensemble.
 MUSIC_FADE_IN=0.8
+
+# Filtre appliqué au morceau AVANT la normalisation, pour que loudnorm
+# mesure le signal corrigé et non l'original. Laisser vide pour aucun filtre.
+#
+# Sert à dégager le grave d'un morceau sub-dominant : ce que le haut-parleur
+# d'un téléphone ne restitue pas occupe quand même le budget de loudnorm, si
+# bien que tout le reste redescend. Mesuré sur le morceau retenu :
+#   aucun filtre                    -20.8 LUFS une fois passé au téléphone
+#   highpass=f=60 + bass=g=-4       -18.5 LUFS   (+2.3 dB audibles)
+MUSIC_FILTER="${MUSIC_FILTER:-highpass=f=60:poles=2,bass=g=-4:f=110}"
 
 # Volume cible en LUFS. -14 est la valeur vers laquelle Instagram, TikTok et
 # YouTube ramènent tout. Viser cette cible évite qu'ils écrasent le morceau.
@@ -1015,11 +1025,44 @@ if [[ -n $MUSIC ]]; then
 
     a_fade_st=$(awk -v t="$total" -v f="$FADE_OUT" 'BEGIN { printf "%.3f", (t - f > 0 ? t - f : 0) }')
 
+    # ── loudnorm en DEUX PASSES ──────────────────────────────────────
+    # En passe unique, loudnorm estime le niveau au fil de l'eau et rate la
+    # cible : mesuré -17.0 LUFS pour une cible de -14 sur un morceau à forte
+    # dynamique. Trois décibels sous la cible, le Reel sort plus faible que
+    # les autres dans le fil.
+    # La première passe mesure l'extrait EXACT qui sera utilisé, filtre
+    # compris ; la seconde applique la correction à partir de ces valeurs.
+    info "  mesure du morceau (première passe loudnorm)…"
+    ln_pre=""
+    if [[ -n $MUSIC_FILTER ]]; then ln_pre="${MUSIC_FILTER},"; fi
+    ln_json=$(ffmpeg -hide_banner -nostats -ss "$MUSIC_START" -t "$total" \
+                  -i "$music_path" \
+                  -af "${ln_pre}loudnorm=I=${MUSIC_LUFS}:TP=-1.5:LRA=11:print_format=json" \
+                  -f null - 2>&1 | sed -n '/^{/,/^}/p')
+    ln_get() { printf '%s' "$ln_json" | sed -n "s/.*\"$1\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" | head -1; }
+    m_i=$(ln_get input_i); m_tp=$(ln_get input_tp)
+    m_lra=$(ln_get input_lra); m_th=$(ln_get input_thresh)
+    m_off=$(ln_get target_offset)
+
+    ln_args="I=${MUSIC_LUFS}:TP=-1.5:LRA=11"
+    if [[ -n $m_i && -n $m_tp && -n $m_lra && -n $m_th && $m_i != "-inf" ]]; then
+        ln_args+=":measured_I=${m_i}:measured_TP=${m_tp}"
+        ln_args+=":measured_LRA=${m_lra}:measured_thresh=${m_th}"
+        if [[ -n $m_off ]]; then ln_args+=":offset=${m_off}"; fi
+        ln_args+=":linear=true"
+        info "  mesuré : I=${m_i} LUFS, TP=${m_tp} dBTP, LRA=${m_lra} LU"
+    else
+        info "  mesure indisponible, repli sur une passe unique"
+    fi
+
     inputs+=(-ss "$MUSIC_START" -t "$total" -i "$music_path")
     # loudnorm avant les fondus : il doit mesurer le morceau, pas les fondus.
     # Il rééchantillonne en interne, d'où l'aresample qui le suit.
     agraph="[${next_in}:a]atrim=duration=${total},asetpts=PTS-STARTPTS"
-    agraph+=",loudnorm=I=${MUSIC_LUFS}:TP=-1.5:LRA=11"
+    # Le filtre passe AVANT loudnorm : sinon loudnorm mesurerait l'original
+    # et la correction du grave ferait dériver le niveau de sortie.
+    if [[ -n $MUSIC_FILTER ]]; then agraph+=",${MUSIC_FILTER}"; fi
+    agraph+=",loudnorm=${ln_args}"
     agraph+=",aresample=48000"
     agraph+=",afade=t=in:st=0:d=${MUSIC_FADE_IN}"
     agraph+=",afade=t=out:st=${a_fade_st}:d=${FADE_OUT}[aout]"
@@ -1027,6 +1070,9 @@ if [[ -n $MUSIC ]]; then
 
     audio_args=(-map "[aout]" -c:a aac -b:a 192k -ar 48000)
     info "musique : $(basename "$music_path") — depuis ${MUSIC_START}s, cible ${MUSIC_LUFS} LUFS"
+    if [[ -n $MUSIC_FILTER ]]; then
+        info "  filtre avant normalisation : ${MUSIC_FILTER}"
+    fi
     info "  fondu audio : ${MUSIC_FADE_IN}s à l'entrée, ${FADE_OUT}s à la sortie depuis ${a_fade_st}s"
 elif (( SILENT_AUDIO == 1 )); then
     inputs+=(-f lavfi -t "$total" -i anullsrc=channel_layout=stereo:sample_rate=48000)

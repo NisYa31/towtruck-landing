@@ -87,9 +87,12 @@ def tempo(x):
     return best, peaks, top, octave
 
 
-def loudness(path, extra=()):
-    cmd = ["ffmpeg", "-nostats", "-i", path, *extra,
-           "-af", "ebur128=peak=true", "-f", "null", "-"]
+def loudness(path, prefiltre=""):
+    """Niveau intégré et LRA. « prefiltre » est CHAÎNÉ à ebur128 et non passé
+    dans un second -af : ffmpeg ne garde que le dernier -af, si bien qu'une
+    seconde option annulerait silencieusement la première."""
+    chaine = (prefiltre + "," if prefiltre else "") + "ebur128=peak=true"
+    cmd = ["ffmpeg", "-nostats", "-i", path, "-af", chaine, "-f", "null", "-"]
     err = subprocess.run(cmd, capture_output=True).stderr.decode()
     grab = lambda k: next((l.split(":")[1].strip()
                            for l in err.splitlines() if l.strip().startswith(k + ":")), "?")
@@ -141,10 +144,11 @@ def main():
     I, LRA = loudness(path)
     low, cen = spectrum(x)
     # Simulation d'un haut-parleur de téléphone : deux passes de coupe-bas.
-    Ip, _ = loudness(path, ("-af", "highpass=f=350:poles=2,highpass=f=350:poles=2"))
+    Ip, _ = loudness(path, "highpass=f=350:poles=2,highpass=f=350:poles=2")
     try:
         perte = float(I.split()[0]) - float(Ip.split()[0])
-        perte_s = f"{perte:+.1f} dB"
+        perte_s = (f"perte de {perte:.1f} dB" if perte > 0
+                   else f"gain de {-perte:.1f} dB")
     except ValueError:
         perte_s = "?"
 

@@ -37,15 +37,20 @@ OUTPUT_NAME="${OUTPUT_NAME:-urus_v1.mp4}"
 # - horodatage : les 6 chiffres du nom de fichier (hf_AAAAMMJJ_XXXXXX_....mp4)
 # - début/fin  : secondes depuis le DÉBUT du fichier source (point décimal, pas
 #                de virgule : 2.5 et non 2,5)
+# Les durées sont calées sur la grille du morceau (94 BPM, un temps = 0.638s).
+# Total : 32 temps, soit exactement 8 mesures. Repasser à 2.5 / 5 / 2 / 2 / 2 /
+# 2 / 5 rend le montage indépendant de la musique, au prix de coupes qui
+# tombent jusqu'à 180 ms à côté du temps.
+#
 # Pour réordonner le montage, il suffit de déplacer les lignes.
 CLIPS=(
-  "192809   0   2.5   # ouverture, hero"
-  "194405   0   5     # désert, mouvement"
-  "193836   0   2     # parking, respiration"
-  "194945   0   2     # poste de conduite"
-  "201411   0   2     # banquette arrière fermée"
-  "201929   0   2     # banquette arrière ouverte"
-  "200403   0   5     # 3/4 arrière, plan final"
+  "192809   0   2.5417   # ouverture, hero           — 61 images,  4 temps"
+  "194405   0   5.1250   # désert, mouvement         — 123 images, 8 temps"
+  "193836   0   1.9167   # parking, respiration      — 46 images,  3 temps"
+  "194945   0   1.9167   # poste de conduite         — 46 images,  3 temps"
+  "201411   0   1.9167   # banquette arrière fermée  — 46 images,  3 temps"
+  "201929   0   1.9167   # banquette arrière ouverte — 46 images,  3 temps"
+  "200403   0   5.0833   # 3/4 arrière, plan final   — 122 images, 8 temps"
 )
 
 # Textes incrustés : "<début> <fin> <texte> <x> <y>"
@@ -74,10 +79,10 @@ CLIPS=(
 #
 # Laisser la liste vide pour un montage sans texte.
 OVERLAYS=(
-  "0.25   2.45   model      0.50  0.00   # LAMBORGHINI / URUS"
-  "3.20   7.10   650hp      0.50  0.00   # POWER / 650 HP"
-  "9.60   11.45  accel      0.50  0.00   # ACCELERATION / 0-100 KM/H IN 3.6S"
-  "16.20  19.90  topspeed   0.50  0.00   # TOP SPEED / 305 KM/H"
+  "0.30   2.40   model      0.50  0.00   # LAMBORGHINI / URUS"
+  "3.19   7.40   650hp      0.50  0.00   # POWER / 650 HP"
+  "9.70   11.40  accel      0.50  0.00   # ACCELERATION / 0-100 KM/H IN 3.6S"
+  "15.96  19.90  topspeed   0.50  0.00   # TOP SPEED / 305 KM/H"
 )
 
 # Durée du fondu d'apparition et de disparition des textes.
@@ -100,7 +105,7 @@ PRESET=slow
 # ── Musique ───────────────────────────────────────────────────────────
 # Chemin vers un fichier audio (mp3, wav, m4a...). Laisser vide pour une
 # vidéo sans musique. Chemin relatif = relatif au dossier des clips.
-MUSIC=""
+MUSIC="vaitsez-car-car-promo-beat-566168.mp3"
 
 # Seconde du morceau à laquelle commencer. Sert à attraper le bon passage :
 # un refrain ou une montée tombent rarement à 0:00.
@@ -887,17 +892,27 @@ for line in "${CLIPS[@]}"; do
     awk -v d="$src_dur" -v e="$end" 'BEGIN { exit !(d + 0.05 < e) }' \
         && die "$(basename "$file") dure ${src_dur}s, or le montage demande jusqu'à ${end}s."
 
-    seg=$(awk -v a="$start" -v b="$end" 'BEGIN { printf "%.3f", b - a }')
-    total=$(awk -v t="$total" -v s="$seg" 'BEGIN { printf "%.3f", t + s }')
+    # Découpe en NUMÉROS D'IMAGES et non en secondes : trim=start_frame/end_frame
+    # garantit un compte exact, là où un découpage en secondes dépend de la
+    # cadence source et fait dériver la durée réelle de la durée annoncée.
+    sf=$(awk -v a="$start" -v f="$FPS" 'BEGIN { printf "%d", int(a * f + 0.5) }')
+    ef=$(awk -v b="$end"   -v f="$FPS" 'BEGIN { printf "%d", int(b * f + 0.5) }')
+    nf=$((ef - sf))
+    (( nf > 0 )) || die "intervalle vide pour l'horodatage $stamp (${start}s → ${end}s)."
+    seg=$(awk -v n="$nf" -v f="$FPS" 'BEGIN { printf "%.4f", n / f }')
+    total=$(awk -v t="$total" -v s="$seg" 'BEGIN { printf "%.4f", t + s }')
 
-    info "$(printf '%d.' $((idx + 1))) $(basename "$file") — ${start}s → ${end}s (${seg}s)"
+    info "$(printf '%d.' $((idx + 1))) $(basename "$file") — ${start}s → ${end}s (${nf} images, ${seg}s)"
 
     inputs+=(-i "$file")
     # trim  : garde l'intervalle demandé      setpts : remet le clip à t=0
     # fps   : cadence uniforme                scale/pad : sécurité si un clip
     #                                         n'est pas déjà en WIDTHxHEIGHT
+    # fps AVANT trim : on normalise la cadence, puis on coupe sur la grille
+    # d'images de sortie. Dans l'autre sens, le nombre d'images produites
+    # dépend de la cadence du fichier source et la durée réelle dérive.
     filters+=(
-        "[${idx}:v]trim=start=${start}:end=${end},setpts=PTS-STARTPTS,fps=${FPS},\
+        "[${idx}:v]fps=${FPS},trim=start_frame=${sf}:end_frame=${ef},setpts=PTS-STARTPTS,\
 scale=${WIDTH}:${HEIGHT}:force_original_aspect_ratio=decrease,\
 pad=${WIDTH}:${HEIGHT}:(ow-iw)/2:(oh-ih)/2,setsar=1,format=yuv420p[v${idx}]"
     )

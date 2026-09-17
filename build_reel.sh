@@ -97,8 +97,25 @@ FADE_OUT=1
 CRF=18
 PRESET=slow
 
-# Piste audio : 1 = ajoute une piste AAC muette (les plateformes la préfèrent),
-# 0 = vidéo sans aucune piste audio.
+# ── Musique ───────────────────────────────────────────────────────────
+# Chemin vers un fichier audio (mp3, wav, m4a...). Laisser vide pour une
+# vidéo sans musique. Chemin relatif = relatif au dossier des clips.
+MUSIC=""
+
+# Seconde du morceau à laquelle commencer. Sert à attraper le bon passage :
+# un refrain ou une montée tombent rarement à 0:00.
+MUSIC_START=0
+
+# Fondu d'entrée de la musique, en secondes. Le fondu de sortie est calé
+# automatiquement sur FADE_OUT, pour que son et image s'éteignent ensemble.
+MUSIC_FADE_IN=0.8
+
+# Volume cible en LUFS. -14 est la valeur vers laquelle Instagram, TikTok et
+# YouTube ramènent tout. Viser cette cible évite qu'ils écrasent le morceau.
+MUSIC_LUFS=-14
+
+# Piste audio quand MUSIC est vide : 1 = piste AAC muette (les plateformes la
+# préfèrent à une absence totale de piste), 0 = aucune piste audio.
 SILENT_AUDIO=1
 
 # ══════════════════════════════════════════════════════════════════════
@@ -946,7 +963,36 @@ else
 fi
 
 audio_args=(-an)
-if (( SILENT_AUDIO == 1 )); then
+if [[ -n $MUSIC ]]; then
+    # Chemin relatif : on le cherche d'abord tel quel, puis dans VIDEO_DIR.
+    music_path="$MUSIC"
+    [[ -f $music_path ]] || music_path="$VIDEO_DIR/$MUSIC"
+    [[ -f $music_path ]] || die "musique introuvable : $MUSIC"
+
+    # Le morceau doit couvrir MUSIC_START + la durée du montage.
+    mus_dur=$(ffprobe -v error -show_entries format=duration \
+                      -of default=nw=1:nk=1 "$music_path" 2>/dev/null) \
+        || die "impossible de lire la durée de $MUSIC — est-ce bien un fichier audio ?"
+    besoin=$(awk -v s="$MUSIC_START" -v t="$total" 'BEGIN { printf "%.2f", s + t }')
+    awk -v d="$mus_dur" -v b="$besoin" 'BEGIN { exit !(d + 0.05 < b) }' \
+        && die "le morceau dure ${mus_dur}s, or il en faut ${besoin}s (MUSIC_START=${MUSIC_START} + montage ${total}s). Baisse MUSIC_START ou prends un morceau plus long."
+
+    a_fade_st=$(awk -v t="$total" -v f="$FADE_OUT" 'BEGIN { printf "%.3f", (t - f > 0 ? t - f : 0) }')
+
+    inputs+=(-ss "$MUSIC_START" -t "$total" -i "$music_path")
+    # loudnorm avant les fondus : il doit mesurer le morceau, pas les fondus.
+    # Il rééchantillonne en interne, d'où l'aresample qui le suit.
+    agraph="[${next_in}:a]atrim=duration=${total},asetpts=PTS-STARTPTS"
+    agraph+=",loudnorm=I=${MUSIC_LUFS}:TP=-1.5:LRA=11"
+    agraph+=",aresample=48000"
+    agraph+=",afade=t=in:st=0:d=${MUSIC_FADE_IN}"
+    agraph+=",afade=t=out:st=${a_fade_st}:d=${FADE_OUT}[aout]"
+    graph+=";${agraph}"
+
+    audio_args=(-map "[aout]" -c:a aac -b:a 192k -ar 48000)
+    info "musique : $(basename "$music_path") — depuis ${MUSIC_START}s, cible ${MUSIC_LUFS} LUFS"
+    info "  fondu audio : ${MUSIC_FADE_IN}s à l'entrée, ${FADE_OUT}s à la sortie depuis ${a_fade_st}s"
+elif (( SILENT_AUDIO == 1 )); then
     inputs+=(-f lavfi -t "$total" -i anullsrc=channel_layout=stereo:sample_rate=48000)
     audio_args=(-map "${next_in}:a" -c:a aac -b:a 128k)
 fi

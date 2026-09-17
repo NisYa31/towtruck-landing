@@ -893,6 +893,17 @@ command -v ffprobe >/dev/null || die "ffprobe introuvable dans le PATH."
 
 OUTPUT="$VIDEO_DIR/$OUTPUT_NAME"
 
+# Existence du morceau vérifiée TOUT DE SUITE. Le contrôle de durée, lui, a
+# besoin de la durée du montage et reste plus bas ; mais échouer sur un
+# fichier absent après avoir déroulé dix plans à l'écran n'aide personne.
+if [[ -n $MUSIC && ! -f $MUSIC && ! -f "$VIDEO_DIR/$MUSIC" ]]; then
+    die "musique introuvable : $MUSIC
+       cherchée ici       : $MUSIC
+       et ici             : $VIDEO_DIR/$MUSIC
+       Dépose le fichier dans $VIDEO_DIR sous ce nom, ou lance :
+         MUSIC=/chemin/vers/ton/fichier.mp3 $0 $VIDEO_DIR"
+fi
+
 BANDDIR=$(mktemp -d)
 trap 'rm -rf "$BANDDIR"' EXIT
 extract_bands "$BANDDIR"

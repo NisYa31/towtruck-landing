@@ -36,26 +36,25 @@ VIDEO_DIR="${1:-${VIDEO_DIR:-videos-cullinan}}"
 # Nom du fichier de sortie.
 OUTPUT_NAME="${OUTPUT_NAME:-cullinan_v1.mp4}"
 
-# ┌────────────────────────────────────────────────────────────────────┐
-# │ GRILLE PROVISOIRE — À REMPLACER AVANT LE PREMIER RENDU RÉEL        │
-# │                                                                    │
-# │ Les dix horodatages sont RÉELS et vérifiés : les dix clips font    │
-# │ tous 1076x1928, 24 fps, 121 images, 5.0417 s.                      │
-# │                                                                    │
-# │ Les DURÉES, elles, sont calculées à 88 BPM — le milieu de la plage │
-# │ visée, faute de morceau. À remplacer dès le tempo mesuré.          │
-# │                                                                    │
-# │ Structure : 6/4/3/3/4/4/3/3/4/6 = 40 temps = 10 mesures. Elle est  │
-# │ valable sur TOUTE la plage 80-100 BPM (écart maximum 18,9 ms).     │
-# │ Un plan de 8 temps comme sur l'Urus exigerait bpm >= 95.2 : 8      │
-# │ temps ne tiennent pas dans 121 images en dessous.                  │
-# │                                                                    │
-# │ Pour produire la vraie grille :                                    │
-# │   1. relever la longueur réelle des clips (ffprobe -count_frames)  │
-# │   2. mesurer le tempo du morceau     : ./tempo.py <musique>        │
-# │   3. calculer la grille               : ./grille.py <bpm> <images> │
-# │   4. recopier ici les lignes produites par grille.py               │
-# └────────────────────────────────────────────────────────────────────┘
+# GRILLE CALÉE SUR LES ACCENTS DU MORCEAU — produite par ./cale_drops.py
+#
+# Tempo mesuré 68.73 BPM (peigne de Dirac, confirmé par les intervalles entre
+# attaques : 0.885 s). Un temps = 0.8730 s, donc un plan ne peut pas dépasser
+# 5 temps : 6 temps feraient 5.238 s quand le clip source n'en offre que
+# 5.0417.
+#
+# Les coupes ne suivent pas une structure décidée d'avance : cale_drops.py a
+# balayé les 127 fenêtres possibles du morceau et retenu celle dont les dix
+# coupes tombent sur les accents les plus francs. Résultat : accent moyen
+# 60 %, coupe la plus faible 48 %. Un départ choisi à la main sur le premier
+# temps fort venu donnait 1 %, 3 % et 19 % sur les trois premières coupes.
+#
+# Structure obtenue : 4/3/2/3/5/2/3/5/2/3 = 32 temps = 8 mesures = 27.9167 s.
+# Les deux plans de 5 temps portent les bandeaux ACCELERATION et TOP SPEED,
+# qui sont les plus longs à lire.
+#
+# Pour réordonner le montage, il suffit de déplacer les lignes : les durées
+# restent attachées à leur position dans la grille, pas au clip.
 #
 # Montage : un clip par ligne.
 #   <horodatage>  <début>  <fin>   # commentaire libre
@@ -65,16 +64,16 @@ OUTPUT_NAME="${OUTPUT_NAME:-cullinan_v1.mp4}"
 #
 # Pour réordonner le montage, il suffit de déplacer les lignes.
 CLIPS=(
-  "103050   0   4.0833   # ouverture    — 98 images, 6 temps"
-  "114625   0   2.7500   # respiration  — 66 images, 4 temps"
-  "232727   0   2.0417   # détail       — 49 images, 3 temps"
-  "233834   0   2.0417   # détail       — 49 images, 3 temps"
-  "234352   0   2.7083   # mouvement    — 65 images, 4 temps"
-  "235028   0   2.7500   # mouvement    — 66 images, 4 temps"
-  "000308   0   2.0417   # détail       — 49 images, 3 temps"
-  "001841   0   2.0417   # détail       — 49 images, 3 temps"
-  "014842   0   2.7083   # respiration  — 65 images, 4 temps"
-  "015438   0   4.1250   # plan final   — 99 images, 6 temps"
+  "103050   0   3.5000   # 84 images, 4 temps — ouverture"
+  "114625   0   2.6250   # 63 images, 3 temps"
+  "232727   0   1.7500   # 42 images, 2 temps"
+  "233834   0   2.5833   # 62 images, 3 temps"
+  "234352   0   4.3750   # 105 images, 5 temps — plan long"
+  "235028   0   1.7500   # 42 images, 2 temps — relance"
+  "000308   0   2.6250   # 63 images, 3 temps"
+  "001841   0   4.3750   # 105 images, 5 temps — plan long"
+  "014842   0   1.7500   # 42 images, 2 temps — relance"
+  "015438   0   2.5833   # 62 images, 3 temps — final"
 )
 
 # Textes incrustés : "<début> <fin> <texte> <x> <y>"
@@ -103,10 +102,10 @@ CLIPS=(
 # Les fenêtres ci-dessous suivent la grille PROVISOIRE et sont à recaler en
 # même temps qu'elle.
 OVERLAYS=(
-  "0.30   3.86   model      0.50  0.00   # ROLLS-ROYCE / CULLINAN  (plan 1)"
-  "4.38   6.61   power      0.50  0.00   # POWER / 593 HP  (plan 2)"
-  "11.22   13.40   accel      0.50  0.00   # ACCELERATION / 0-100 KM/H IN 5.0S  (plan 5)"
-  "20.76   22.95   topspeed   0.50  0.00   # TOP SPEED / 250 KM/H  (plan 9)"
+  "0.30   3.28   model      0.50  0.00   # ROLLS-ROYCE / CULLINAN  (plan 1)"
+  "3.80   5.91   power      0.50  0.00   # POWER / 593 HP  (plan 2)"
+  "10.76   14.61   accel      0.50  0.00   # ACCELERATION / 0-100 KM/H IN 5.0S  (plan 5)"
+  "19.51   23.36   topspeed   0.50  0.00   # TOP SPEED / 250 KM/H  (plan 8)"
 )
 
 # Durée du fondu d'apparition et de disparition des textes.
@@ -131,15 +130,15 @@ PRESET=slow
 # vidéo sans musique. Chemin relatif = relatif au dossier des clips.
 # À REMPLIR : registre Cullinan (cinématographique lent / orchestral minimal,
 # 80-100 BPM), pas le registre Urus.
-MUSIC="${MUSIC:-}"
+MUSIC="${MUSIC:-gr0za-car-car-music-503347.mp3}"
 
 # Seconde du morceau à laquelle commencer. Sert à attraper le bon passage :
 # un refrain ou une montée tombent rarement à 0:00. Voir ./find_drop.sh
-MUSIC_START="${MUSIC_START:-0}"
+MUSIC_START="${MUSIC_START:-101.4051}"
 
 # Fondu d'entrée de la musique, en secondes. Le fondu de sortie est calé
 # automatiquement sur FADE_OUT, pour que son et image s'éteignent ensemble.
-MUSIC_FADE_IN=0.8
+MUSIC_FADE_IN=0.4
 
 # Filtre appliqué au morceau AVANT la normalisation, pour que loudnorm
 # mesure le signal corrigé et non l'original. Laisser vide pour aucun filtre.
@@ -147,9 +146,13 @@ MUSIC_FADE_IN=0.8
 # Sert à dégager le grave d'un morceau sub-dominant : ce que le haut-parleur
 # d'un téléphone ne restitue pas occupe quand même le budget de loudnorm, si
 # bien que tout le reste redescend. Mesuré sur le morceau retenu :
-#   aucun filtre                    -20.8 LUFS une fois passé au téléphone
-#   highpass=f=60 + bass=g=-4       -18.5 LUFS   (+2.3 dB audibles)
-MUSIC_FILTER="${MUSIC_FILTER:-highpass=f=60:poles=2,bass=g=-4:f=110}"
+# Mesuré sur l'extrait retenu, après normalisation à -14 LUFS :
+#   aucun filtre                    -22.4 LUFS une fois passé au téléphone
+#   highpass=f=60                   -18.4
+#   highpass=f=60 + bass=g=-6       -16.9   (+5.5 dB audibles)
+# Les bosses d'aigu ou de médium n'apportent rien : loudnorm les reprend en
+# baissant le gain global. Seul le retrait du grave inaudible libère du budget.
+MUSIC_FILTER="${MUSIC_FILTER:-highpass=f=60:poles=2,bass=g=-6:f=110}"
 
 # Volume cible en LUFS. -14 est la valeur vers laquelle Instagram, TikTok et
 # YouTube ramènent tout. Viser cette cible évite qu'ils écrasent le morceau.

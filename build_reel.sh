@@ -42,6 +42,27 @@ CLIPS=(
   "200403   0   5     # 3/4 arrière, plan final"
 )
 
+# Textes incrustes : "<début> <fin> <texte>"
+#   début/fin = secondes dans le MONTAGE FINAL (pas dans le clip source)
+# Repères de montage : plan 1 = 0→2.5, plan 2 = 2.5→7.5, plan 3 = 7.5→9.5,
+#   plan 4 = 9.5→11.5, plan 5 = 11.5→13.5, plan 6 = 13.5→15.5, plan 7 = 15.5→20.5
+# Laisser la liste vide pour un montage sans texte.
+OVERLAYS=(
+  "3.2    7.10   650 HP"
+  "9.70   11.45  0-100 KM/H IN 3.6S"
+  "16.2   19.90  TOP SPEED 305 KM/H"
+)
+
+# Apparence des textes.
+TEXT_SIZE=64        # taille de police en pixels
+TEXT_Y=0.70         # position verticale : 0 = haut, 1 = bas
+TEXT_PAD=26         # marge intérieure de la bande translucide
+BOX_OPACITY=0.5     # opacité de la bande : 0 = invisible, 1 = noir opaque
+TEXT_FADE=0.3       # durée du fondu d'apparition et de disparition
+
+# Police. Laisser vide pour une détection automatique, ou donner un chemin.
+FONT="${FONT:-}"
+
 # Format de sortie.
 WIDTH=1076
 HEIGHT=1928
@@ -122,13 +143,64 @@ shopt -u nullglob
 graph=$(IFS=';'; echo "${filters[*]}")
 graph+=";${concat_labels}concat=n=${idx}:v=1:a=0[vcat]"
 
+# Incrustations de texte, appliquées après la concaténation donc en temps
+# de montage final. Le fondu de sortie global les emporte avec l'image.
+prev=vcat
+if (( ${#OVERLAYS[@]} > 0 )); then
+    # Détection de la police : macOS d'abord, puis Linux.
+    if [[ -z $FONT ]]; then
+        for f in \
+            "/System/Library/Fonts/Supplemental/Arial Bold.ttf" \
+            "/System/Library/Fonts/Supplemental/Arial.ttf" \
+            "/System/Library/Fonts/HelveticaNeue.ttc" \
+            "/System/Library/Fonts/Helvetica.ttc" \
+            "/Library/Fonts/Arial Bold.ttf" \
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" \
+            "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
+        do
+            [[ -f $f ]] && { FONT="$f"; break; }
+        done
+    fi
+    [[ -n $FONT && -f $FONT ]] || die "aucune police trouvée. Indique-en une : FONT=/chemin/police.ttf $0"
+    info "police : $(basename "$FONT")"
+
+    # Échappe les caractères que drawtext interprète.
+    esc_text() {
+        printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/:/\\:/g' -e "s/'/\\\\\\\\'/g" -e 's/%/\\%/g'
+    }
+
+    n=0
+    for line in "${OVERLAYS[@]}"; do
+        read -r t_in t_out text <<<"$line"
+        [[ -n ${text:-} ]] || die "incrustation sans texte : $line"
+
+        # Alpha : 0, montée sur TEXT_FADE, plateau à 1, descente, 0.
+        # Les virgules sont échappées car elles séparent les filtres.
+        a="if(lt(t\,${t_in})\,0"
+        a+="\,if(lt(t\,${t_in}+${TEXT_FADE})\,(t-${t_in})/${TEXT_FADE}"
+        a+="\,if(lt(t\,${t_out}-${TEXT_FADE})\,1"
+        a+="\,if(lt(t\,${t_out})\,(${t_out}-t)/${TEXT_FADE}\,0))))"
+
+        graph+=";[${prev}]drawtext=fontfile='${FONT}'"
+        graph+=":text='$(esc_text "$text")'"
+        graph+=":fontsize=${TEXT_SIZE}:fontcolor=white"
+        graph+=":box=1:boxcolor=black@${BOX_OPACITY}:boxborderw=${TEXT_PAD}"
+        graph+=":x=(w-tw)/2:y=h*${TEXT_Y}-th/2"
+        graph+=":alpha='${a}'[d${n}]"
+
+        info "texte « ${text} » de ${t_in}s à ${t_out}s"
+        prev="d${n}"
+        n=$((n + 1))
+    done
+fi
+
 # Fondu de sortie sur la fin du montage global.
 if awk -v f="$FADE_OUT" 'BEGIN { exit !(f > 0) }'; then
     fade_st=$(awk -v t="$total" -v f="$FADE_OUT" 'BEGIN { printf "%.3f", (t - f > 0 ? t - f : 0) }')
-    graph+=";[vcat]fade=t=out:st=${fade_st}:d=${FADE_OUT}[vout]"
+    graph+=";[${prev}]fade=t=out:st=${fade_st}:d=${FADE_OUT}[vout]"
     info "fondu de sortie : ${FADE_OUT}s à partir de ${fade_st}s"
 else
-    graph+=";[vcat]null[vout]"
+    graph+=";[${prev}]null[vout]"
 fi
 
 audio_args=(-an)

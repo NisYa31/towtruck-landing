@@ -37,20 +37,21 @@ OUTPUT_NAME="${OUTPUT_NAME:-urus_v1.mp4}"
 # - horodatage : les 6 chiffres du nom de fichier (hf_AAAAMMJJ_XXXXXX_....mp4)
 # - début/fin  : secondes depuis le DÉBUT du fichier source (point décimal, pas
 #                de virgule : 2.5 et non 2,5)
-# Les durées sont calées sur la grille du morceau (94 BPM, un temps = 0.638s).
-# Total : 32 temps, soit exactement 8 mesures. Repasser à 2.5 / 5 / 2 / 2 / 2 /
-# 2 / 5 rend le montage indépendant de la musique, au prix de coupes qui
-# tombent jusqu'à 180 ms à côté du temps.
+# Les durées sont calées sur la grille du morceau (95.15 BPM mesuré, un temps =
+# 0.6306s). Total : 32 temps, soit exactement 8 mesures. Les deux plans de 8
+# temps consomment les 121 images du clip source, toute sa longueur : aucune
+# marge sur ces deux-là. Revenir à 2.5 / 5 / 2 / 2 / 2 / 2 / 5 rend le montage
+# indépendant de la musique, au prix de coupes jusqu'à 180 ms à côté du temps.
 #
 # Pour réordonner le montage, il suffit de déplacer les lignes.
 CLIPS=(
   "192809   0   2.5417   # ouverture, hero           — 61 images,  4 temps"
-  "194405   0   5.1250   # désert, mouvement         — 123 images, 8 temps"
-  "193836   0   1.9167   # parking, respiration      — 46 images,  3 temps"
-  "194945   0   1.9167   # poste de conduite         — 46 images,  3 temps"
+  "194405   0   5.0417   # désert, mouvement         — 121 images, 8 temps"
+  "193836   0   1.8750   # parking, respiration      — 45 images,  3 temps"
+  "194945   0   1.8750   # poste de conduite         — 45 images,  3 temps"
   "201411   0   1.9167   # banquette arrière fermée  — 46 images,  3 temps"
-  "201929   0   1.9167   # banquette arrière ouverte — 46 images,  3 temps"
-  "200403   0   5.0833   # 3/4 arrière, plan final   — 122 images, 8 temps"
+  "201929   0   1.8750   # banquette arrière ouverte — 45 images,  3 temps"
+  "200403   0   5.0417   # 3/4 arrière, plan final   — 121 images, 8 temps"
 )
 
 # Textes incrustés : "<début> <fin> <texte> <x> <y>"
@@ -62,8 +63,9 @@ CLIPS=(
 #               y : 0 = haut,        0.5 = milieu, 1 = bas
 #               Le texte est automatiquement empêché de déborder de l'image.
 #
-# Repères de montage : plan 1 = 0→2.5, plan 2 = 2.5→7.5, plan 3 = 7.5→9.5,
-#   plan 4 = 9.5→11.5, plan 5 = 11.5→13.5, plan 6 = 13.5→15.5, plan 7 = 15.5→20.5
+# Repères de montage : plan 1 = 0→2.54, plan 2 = 2.54→7.58, plan 3 = 7.58→9.46,
+#   plan 4 = 9.46→11.33, plan 5 = 11.33→13.25, plan 6 = 13.25→15.13,
+#   plan 7 = 15.13→20.17
 #
 # Zone sûre Instagram : garder y entre 0.12 et 0.78, sinon l'interface
 # (pseudo, légende, boutons) recouvre le texte.
@@ -79,10 +81,10 @@ CLIPS=(
 #
 # Laisser la liste vide pour un montage sans texte.
 OVERLAYS=(
-  "0.30   2.40   model      0.50  0.00   # LAMBORGHINI / URUS"
-  "3.19   7.40   650hp      0.50  0.00   # POWER / 650 HP"
-  "9.70   11.40  accel      0.50  0.00   # ACCELERATION / 0-100 KM/H IN 3.6S"
-  "15.96  19.90  topspeed   0.50  0.00   # TOP SPEED / 305 KM/H"
+  "0.30   2.45   model      0.50  0.00   # LAMBORGHINI / URUS"
+  "3.15   7.35   650hp      0.50  0.00   # POWER / 650 HP"
+  "9.55   11.25  accel      0.50  0.00   # ACCELERATION / 0-100 KM/H IN 3.6S"
+  "15.77  19.60  topspeed   0.50  0.00   # TOP SPEED / 305 KM/H"
 )
 
 # Durée du fondu d'apparition et de disparition des textes.
@@ -889,8 +891,7 @@ for line in "${CLIPS[@]}"; do
     # Contrôle : le clip est-il assez long pour l'intervalle demandé ?
     src_dur=$(ffprobe -v error -select_streams v:0 -show_entries format=duration \
                       -of default=nw=1:nk=1 "$file")
-    awk -v d="$src_dur" -v e="$end" 'BEGIN { exit !(d + 0.05 < e) }' \
-        && die "$(basename "$file") dure ${src_dur}s, or le montage demande jusqu'à ${end}s."
+    src_frames=$(awk -v d="$src_dur" -v f="$FPS" 'BEGIN { printf "%d", int(d * f + 0.5) }')
 
     # Découpe en NUMÉROS D'IMAGES et non en secondes : trim=start_frame/end_frame
     # garantit un compte exact, là où un découpage en secondes dépend de la
@@ -899,6 +900,7 @@ for line in "${CLIPS[@]}"; do
     ef=$(awk -v b="$end"   -v f="$FPS" 'BEGIN { printf "%d", int(b * f + 0.5) }')
     nf=$((ef - sf))
     (( nf > 0 )) || die "intervalle vide pour l'horodatage $stamp (${start}s → ${end}s)."
+    (( ef <= src_frames )) || die "$(basename "$file") ne contient que ${src_frames} images (${src_dur}s), or le montage en demande ${ef}. Ce plan ne peut pas dépasser $(awk -v n="$src_frames" -v f="$FPS" 'BEGIN { printf "%.4f", n / f }')s."
     seg=$(awk -v n="$nf" -v f="$FPS" 'BEGIN { printf "%.4f", n / f }')
     total=$(awk -v t="$total" -v s="$seg" 'BEGIN { printf "%.4f", t + s }')
 

@@ -39,11 +39,16 @@ OUTPUT_NAME="${OUTPUT_NAME:-cullinan_v1.mp4}"
 # ┌────────────────────────────────────────────────────────────────────┐
 # │ GRILLE PROVISOIRE — À REMPLACER AVANT LE PREMIER RENDU RÉEL        │
 # │                                                                    │
-# │ Les horodatages et les durées ci-dessous sont ceux de l'URUS. Ils  │
-# │ sont là pour que le script soit lisible et testable, PAS pour être │
-# │ lancés tels quels : aucun fichier Cullinan ne correspondra, et le  │
-# │ script s'arrêtera sur « aucun fichier ne correspond à             │
-# │ l'horodatage … ». C'est voulu.                                     │
+# │ Les dix horodatages sont RÉELS et vérifiés : les dix clips font    │
+# │ tous 1076x1928, 24 fps, 121 images, 5.0417 s.                      │
+# │                                                                    │
+# │ Les DURÉES, elles, sont calculées à 88 BPM — le milieu de la plage │
+# │ visée, faute de morceau. À remplacer dès le tempo mesuré.          │
+# │                                                                    │
+# │ Structure : 6/4/3/3/4/4/3/3/4/6 = 40 temps = 10 mesures. Elle est  │
+# │ valable sur TOUTE la plage 80-100 BPM (écart maximum 18,9 ms).     │
+# │ Un plan de 8 temps comme sur l'Urus exigerait bpm >= 95.2 : 8      │
+# │ temps ne tiennent pas dans 121 images en dessous.                  │
 # │                                                                    │
 # │ Pour produire la vraie grille :                                    │
 # │   1. relever la longueur réelle des clips (ffprobe -count_frames)  │
@@ -60,13 +65,16 @@ OUTPUT_NAME="${OUTPUT_NAME:-cullinan_v1.mp4}"
 #
 # Pour réordonner le montage, il suffit de déplacer les lignes.
 CLIPS=(
-  "192809   0   2.5417   # ouverture, hero           — 61 images,  4 temps"
-  "194405   0   5.0417   # plan long, mouvement      — 121 images, 8 temps"
-  "193836   0   1.8750   # respiration               — 45 images,  3 temps"
-  "194945   0   1.8750   # poste de conduite         — 45 images,  3 temps"
-  "201411   0   1.9167   # détail intérieur          — 46 images,  3 temps"
-  "201929   0   1.8750   # détail intérieur          — 45 images,  3 temps"
-  "200403   0   5.0417   # 3/4 arrière, plan final   — 121 images, 8 temps"
+  "103050   0   4.0833   # ouverture    — 98 images, 6 temps"
+  "114625   0   2.7500   # respiration  — 66 images, 4 temps"
+  "232727   0   2.0417   # détail       — 49 images, 3 temps"
+  "233834   0   2.0417   # détail       — 49 images, 3 temps"
+  "234352   0   2.7083   # mouvement    — 65 images, 4 temps"
+  "235028   0   2.7500   # mouvement    — 66 images, 4 temps"
+  "000308   0   2.0417   # détail       — 49 images, 3 temps"
+  "001841   0   2.0417   # détail       — 49 images, 3 temps"
+  "014842   0   2.7083   # respiration  — 65 images, 4 temps"
+  "015438   0   4.1250   # plan final   — 99 images, 6 temps"
 )
 
 # Textes incrustés : "<début> <fin> <texte> <x> <y>"
@@ -95,10 +103,10 @@ CLIPS=(
 # Les fenêtres ci-dessous suivent la grille PROVISOIRE et sont à recaler en
 # même temps qu'elle.
 OVERLAYS=(
-  "0.30   2.45   model      0.50  0.00   # ROLLS-ROYCE / CULLINAN"
-  "3.15   7.35   power      0.50  0.00   # POWER / 593 HP"
-  "9.55   11.25  accel      0.50  0.00   # ACCELERATION / 0-100 KM/H IN 5.0S"
-  "15.77  19.60  topspeed   0.50  0.00   # TOP SPEED / 250 KM/H"
+  "0.30   3.86   model      0.50  0.00   # ROLLS-ROYCE / CULLINAN  (plan 1)"
+  "4.38   6.61   power      0.50  0.00   # POWER / 593 HP  (plan 2)"
+  "11.22   13.40   accel      0.50  0.00   # ACCELERATION / 0-100 KM/H IN 5.0S  (plan 5)"
+  "20.76   22.95   topspeed   0.50  0.00   # TOP SPEED / 250 KM/H  (plan 9)"
 )
 
 # Durée du fondu d'apparition et de disparition des textes.

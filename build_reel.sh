@@ -31,7 +31,7 @@ export LC_ALL=C
 # ══════════════════════════════════════════════════════════════════════
 
 # Dossier contenant les clips sources (et où sera écrit le rendu).
-VIDEO_DIR="${1:-${VIDEO_DIR:-Video-cullinan}}"
+VIDEO_DIR="${1:-${VIDEO_DIR:-videos-cullinan}}"
 
 # Nom du fichier de sortie.
 OUTPUT_NAME="${OUTPUT_NAME:-cullinan_v1.mp4}"
